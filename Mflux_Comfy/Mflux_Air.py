@@ -918,3 +918,106 @@ if HAS_SEEDVR2:
                 mlx_cache_limit_gb=mlx_cache_limit_gb,
             )
             return generated
+
+
+# ---------------------------------------------------------------------------
+# Node: MfluxDepthProNode
+# Exportiert eine Tiefenkarte aus einem Bild via Apple Depth Pro.
+# Output: IMAGE (Tiefenkarte als Graustufen-Tensor) + min/max Tiefenwerte.
+# Verwendung: Vorschau, Export als PNG, oder Input für MfluxDepthNode.
+# ---------------------------------------------------------------------------
+try:
+    from mflux.models.depth_pro.model.depth_pro import DepthPro as _DepthPro
+    HAS_DEPTH_PRO = True
+except ImportError:
+    HAS_DEPTH_PRO = False
+    print("[Mflux] DepthPro not available")
+
+if HAS_DEPTH_PRO:
+    _DEPTH_PRO_CACHE = {}
+
+    class MfluxDepthProNode:
+        @classmethod
+        def INPUT_TYPES(cls):
+            return {
+                "required": {
+                    "quantize": (["None", "4", "8"], {
+                        "default": "8",
+                        "tooltip": "Quantisierung für Depth Pro. "
+                                   "Qualität kann je nach Bild variieren. "
+                                   "8bit ist ein guter Kompromiss.",
+                    }),
+                    "save_depth_png": ("BOOLEAN", {
+                        "default": False,
+                        "label_on": "True", "label_off": "False",
+                        "tooltip": "Tiefenkarte zusätzlich als PNG neben dem Eingabebild speichern "
+                                   "(Suffix _depth.png).",
+                    }),
+                },
+                "optional": {
+                    "image_tensor": ("IMAGE", {
+                        "tooltip": "Bild direkt von einem anderen Node.",
+                    }),
+                    "image_ref": ("MfluxImageRefPipeline", {
+                        "tooltip": "Alternative: MfluxImageRefLoader verbinden.",
+                    }),
+                },
+            }
+
+        RETURN_TYPES  = ("IMAGE",  "FLOAT",     "FLOAT")
+        RETURN_NAMES  = ("depth_map", "min_depth", "max_depth")
+        CATEGORY      = "MFlux/Pro"
+        FUNCTION      = "run"
+        OUTPUT_NODE   = True
+
+        def run(self, quantize, save_depth_png,
+                image_tensor=None, image_ref=None):
+
+            # ── Bildpfad bestimmen ──────────────────────────────────────────
+            if image_tensor is not None:
+                from .Mflux_Pro import _tensor_to_temp_path
+                image_path = _tensor_to_temp_path(image_tensor)
+                print("[MfluxDepthPro] Using image from tensor.")
+            elif image_ref is not None:
+                image_path = image_ref.image_path
+                print(f"[MfluxDepthPro] Using image: {image_path}")
+            else:
+                raise ValueError(
+                    "[MfluxDepthPro] Kein Bild verbunden. "
+                    "Verbinde entweder image_tensor oder image_ref."
+                )
+
+            # ── Modell laden (gecacht) ──────────────────────────────────────
+            q = None if quantize == "None" else int(quantize)
+            cache_key = f"depth_pro::{quantize}"
+            if cache_key not in _DEPTH_PRO_CACHE:
+                print(f"[MfluxDepthPro] Loading DepthPro (quantize={quantize}) ...")
+                print("[MfluxDepthPro] First run: ~1.9GB download from Apple may occur.")
+                _DEPTH_PRO_CACHE[cache_key] = _DepthPro(quantize=q)
+            model = _DEPTH_PRO_CACHE[cache_key]
+
+            # ── Tiefenkarte erstellen ───────────────────────────────────────
+            print("[MfluxDepthPro] Creating depth map ...")
+            result = model.create_depth_map(image_path)
+
+            print(f"[MfluxDepthPro] min_depth={result.min_depth:.4f}, "
+                  f"max_depth={result.max_depth:.4f}")
+
+            # ── PIL Image → Tensor ──────────────────────────────────────────
+            import numpy as np
+            import torch
+            depth_np = np.array(result.depth_image).astype(np.float32) / 255.0
+            if depth_np.ndim == 2:
+                # Graustufen → RGB (3 Kanäle) damit ComfyUI es verarbeiten kann
+                depth_np = np.stack([depth_np] * 3, axis=-1)
+            depth_tensor = torch.from_numpy(depth_np).unsqueeze(0)  # [1, H, W, 3]
+
+            # ── Optional als PNG speichern ──────────────────────────────────
+            if save_depth_png:
+                import os
+                base, ext = os.path.splitext(image_path)
+                out_path = f"{base}_depth.png"
+                result.depth_image.save(out_path)
+                print(f"[MfluxDepthPro] Depth map saved: {out_path}")
+
+            return (depth_tensor, result.min_depth, result.max_depth)

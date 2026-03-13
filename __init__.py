@@ -89,6 +89,13 @@ if HAS_SEEDVR2:
     NODE_CLASS_MAPPINGS["MfluxSeedVR2Node"] = MfluxSeedVR2Node
     NODE_DISPLAY_NAME_MAPPINGS["MfluxSeedVR2Node"] = "MFlux SeedVR2 Upscaler"
 
+try:
+    from .Mflux_Comfy.Mflux_Air import MfluxDepthProNode
+    NODE_CLASS_MAPPINGS["MfluxDepthProNode"] = MfluxDepthProNode
+    NODE_DISPLAY_NAME_MAPPINGS["MfluxDepthProNode"] = "MFlux Depth Pro (Depth Map Export)"
+except ImportError:
+    pass
+
 if HAS_QWEN:
     from .Mflux_Comfy.Mflux_Air import MfluxQwenNode, MfluxQwenEditNode
     NODE_CLASS_MAPPINGS["MfluxQwenNode"] = MfluxQwenNode

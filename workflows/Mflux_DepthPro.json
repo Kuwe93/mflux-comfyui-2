@@ -1,0 +1,173 @@
+{
+  "last_node_id": 4,
+  "last_link_id": 3,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Note",
+      "pos": [
+        20,
+        20
+      ],
+      "size": [
+        500,
+        130
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "title": "Anleitung",
+      "widgets_values": [
+        "Depth Pro – Tiefenkarte exportieren\n\nVerbinde ein Bild via image_ref (MfluxImageRefLoader)\noder image_tensor (von einem anderen Node).\n\nOutput depth_map kann direkt als Vorschau dienen\noder an MfluxDepthNode weitergegeben werden.\nsave_depth_png speichert die Karte neben dem Originalbild."
+      ],
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "color": "#332222",
+      "bgcolor": "#332222"
+    },
+    {
+      "id": 2,
+      "type": "MfluxImageRefLoader",
+      "pos": [
+        20,
+        170
+      ],
+      "size": [
+        320,
+        100
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "title": "Eingabebild",
+      "widgets_values": [
+        "example.png"
+      ],
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "image_ref",
+          "type": "MfluxImageRefPipeline",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MfluxImageRefLoader"
+      }
+    },
+    {
+      "id": 3,
+      "type": "MfluxDepthProNode",
+      "pos": [
+        380,
+        170
+      ],
+      "size": [
+        320,
+        200
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "title": "Depth Pro",
+      "widgets_values": [
+        "8",
+        false
+      ],
+      "inputs": [
+        {
+          "name": "image_tensor",
+          "type": "IMAGE",
+          "link": null,
+          "slot_index": 0
+        },
+        {
+          "name": "image_ref",
+          "type": "MfluxImageRefPipeline",
+          "link": 1,
+          "slot_index": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "depth_map",
+          "type": "IMAGE",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "min_depth",
+          "type": "FLOAT",
+          "links": [],
+          "slot_index": 1
+        },
+        {
+          "name": "max_depth",
+          "type": "FLOAT",
+          "links": [],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MfluxDepthProNode"
+      }
+    },
+    {
+      "id": 4,
+      "type": "PreviewImage",
+      "pos": [
+        740,
+        170
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "title": "Depth Map Preview",
+      "widgets_values": [],
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2,
+          "slot_index": 0
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      3,
+      1,
+      "MfluxImageRefPipeline"
+    ],
+    [
+      2,
+      3,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}
