@@ -472,6 +472,48 @@ def generate_image(prompt, model, seed, width, height, steps, guidance,
     return (_tensor_from_image(generated),)
 
 
+def generate_flux2_edit(prompt, seed, width, height, steps, guidance, quantize,
+                        image_paths, image_strength=None, Local_model="", Loras=None):
+    """FLUX.2 Klein Edit – image-conditioned editing with one or more reference images."""
+    if not HAS_FLUX2_EDIT:
+        raise RuntimeError("Flux2KleinEdit not available. Run: pip install -U mflux")
+    seed = random.randint(0, 0xFFFFFFFFFFFFFFFF) if seed == -1 else int(seed)
+    lora_paths, lora_scales = get_lora_info(Loras)
+    q = None if quantize == "None" else int(quantize)
+
+    key = f"flux2_edit::{quantize}::{Local_model}"
+    inst = _MODEL_CACHE.get(key)
+    if inst is None:
+        path = Local_model.strip() if Local_model and Local_model.strip() else None
+        inst = Flux2KleinEdit(
+            quantize=q,
+            model_path=path,
+            lora_paths=lora_paths,
+            lora_scales=lora_scales,
+        )
+        _evict_and_store(key, inst)
+
+    # image_paths: Liste von Pfaden, leere Strings herausfiltern
+    valid_paths = [p for p in image_paths if p and str(p).strip()]
+    if not valid_paths:
+        raise ValueError("[Mflux] Flux2Edit: mindestens ein Referenzbild muss angegeben werden.")
+
+    gen_kwargs = {
+        "prompt":             prompt,
+        "seed":               seed,
+        "num_inference_steps": steps,
+        "width":              width,
+        "height":             height,
+        "guidance":           guidance,
+        "image_paths":        valid_paths,
+    }
+    if image_strength is not None:
+        gen_kwargs["image_strength"] = image_strength
+
+    generated = inst.generate_image(**gen_kwargs)
+    return (_tensor_from_image(generated),)
+
+
 def generate_fill(prompt, seed, width, height, steps, guidance, quantize,
                   image_path, mask_path, Local_model="", Loras=None):
     if not HAS_FILL:

@@ -1,0 +1,234 @@
+{
+  "last_node_id": 5,
+  "last_link_id": 4,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Note",
+      "pos": [
+        20,
+        20
+      ],
+      "size": [
+        500,
+        120
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "title": "Anleitung",
+      "widgets_values": [
+        "FLUX.2 Klein – Image-Conditioned Edit\n\nVerbinde 1–3 Referenzbilder via MfluxImageRefLoader.\nBeschreibe die gewünschte Änderung im Prompt.\nBeispiel: 'Make the woman wear the eyeglasses'\nModell: flux2-klein-9b empfohlen für beste Qualität."
+      ],
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "color": "#223333",
+      "bgcolor": "#223333"
+    },
+    {
+      "id": 2,
+      "type": "MfluxImageRefLoader",
+      "pos": [
+        20,
+        160
+      ],
+      "size": [
+        320,
+        120
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "title": "Referenzbild 1 (required)",
+      "widgets_values": [
+        "example.png"
+      ],
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "image_ref",
+          "type": "MfluxImageRefPipeline",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MfluxImageRefLoader"
+      }
+    },
+    {
+      "id": 3,
+      "type": "MfluxImageRefLoader",
+      "pos": [
+        20,
+        300
+      ],
+      "size": [
+        320,
+        120
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "title": "Referenzbild 2 (optional)",
+      "widgets_values": [
+        "example.png"
+      ],
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "image_ref",
+          "type": "MfluxImageRefPipeline",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MfluxImageRefLoader"
+      }
+    },
+    {
+      "id": 4,
+      "type": "MfluxFlux2EditNode",
+      "pos": [
+        380,
+        160
+      ],
+      "size": [
+        380,
+        460
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "title": "FLUX.2 Edit",
+      "widgets_values": [
+        "Make the woman wear the eyeglasses",
+        "flux2-klein-9b",
+        "4",
+        42,
+        1024,
+        1024,
+        4,
+        1.0,
+        true,
+        0.85
+      ],
+      "inputs": [
+        {
+          "name": "image_ref_1",
+          "type": "MfluxImageRefPipeline",
+          "link": 1,
+          "slot_index": 0
+        },
+        {
+          "name": "image_ref_2",
+          "type": "MfluxImageRefPipeline",
+          "link": 2,
+          "slot_index": 1
+        },
+        {
+          "name": "image_ref_3",
+          "type": "MfluxImageRefPipeline",
+          "link": null,
+          "slot_index": 2
+        },
+        {
+          "name": "image_strength",
+          "type": "FLOAT",
+          "link": null,
+          "slot_index": 3
+        },
+        {
+          "name": "Local_model",
+          "type": "PATH",
+          "link": null,
+          "slot_index": 4
+        },
+        {
+          "name": "Loras",
+          "type": "MfluxLorasPipeline",
+          "link": null,
+          "slot_index": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MfluxFlux2EditNode"
+      }
+    },
+    {
+      "id": 5,
+      "type": "PreviewImage",
+      "pos": [
+        800,
+        160
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "title": "Preview",
+      "widgets_values": [],
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 3,
+          "slot_index": 0
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      4,
+      0,
+      "MfluxImageRefPipeline"
+    ],
+    [
+      2,
+      3,
+      0,
+      4,
+      1,
+      "MfluxImageRefPipeline"
+    ],
+    [
+      3,
+      4,
+      0,
+      5,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

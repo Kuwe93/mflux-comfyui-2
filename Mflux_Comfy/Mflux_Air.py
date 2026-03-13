@@ -726,3 +726,100 @@ if HAS_QWEN:
                     extra_meta={"image_paths": image_ref.image_paths, "variant": "qwen-edit"},
                 )
             return generated
+
+
+# ---------------------------------------------------------------------------
+# Node: MfluxFlux2EditNode
+# FLUX.2 Klein Edit – image-conditioned editing mit 1–3 Referenzbildern
+# ---------------------------------------------------------------------------
+if HAS_FLUX2_EDIT:
+    from .Mflux_Core import generate_flux2_edit
+
+    class MfluxFlux2EditNode:
+        @classmethod
+        def INPUT_TYPES(cls):
+            return {
+                "required": {
+                    "prompt":   ("STRING", {
+                        "multiline": True,
+                        "default": "Make the woman wear the eyeglasses",
+                        "tooltip": "Describe the desired edit. Reference the subjects from the input images.",
+                    }),
+                    "model":    (["flux2-klein-4b", "flux2-klein-9b"], {
+                        "default": "flux2-klein-9b",
+                    }),
+                    "quantize": (ALL_QUANTIZE_OPTIONS, {"default": "4"}),
+                    "seed":     ("INT", {"default": -1, "min": -1, "max": 0xFFFFFFFFFFFFFFFF}),
+                    "width":    ("INT", {"default": 1024, "min": 64, "max": 4096, "step": 16}),
+                    "height":   ("INT", {"default": 1024, "min": 64, "max": 4096, "step": 16}),
+                    "steps":    ("INT", {"default": 4, "min": 1, "max": 100}),
+                    "guidance": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 20.0, "step": 0.5}),
+                    "metadata": ("BOOLEAN", {"default": True, "label_on": "True", "label_off": "False"}),
+                    # Referenzbild 1 ist required – weitere optional
+                    "image_ref_1": ("MfluxImageRefPipeline", {
+                        "tooltip": "First reference image (required).",
+                    }),
+                },
+                "optional": {
+                    "image_ref_2": ("MfluxImageRefPipeline", {
+                        "tooltip": "Second reference image (optional).",
+                    }),
+                    "image_ref_3": ("MfluxImageRefPipeline", {
+                        "tooltip": "Third reference image (optional).",
+                    }),
+                    "image_strength": ("FLOAT", {
+                        "default": 0.85, "min": 0.0, "max": 1.0, "step": 0.01,
+                        "tooltip": "How strongly the reference images influence the output. "
+                                   "Leave disconnected to use model default.",
+                    }),
+                    "Local_model": ("PATH",),
+                    "Loras":       ("MfluxLorasPipeline",),
+                },
+                "hidden": {"full_prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
+            }
+
+        RETURN_TYPES = ("IMAGE",)
+        CATEGORY = "MFlux/Air"
+        FUNCTION = "run"
+
+        def run(self, prompt, model, quantize, seed, width, height, steps, guidance,
+                metadata, image_ref_1,
+                image_ref_2=None, image_ref_3=None, image_strength=None,
+                Local_model="", Loras=None,
+                full_prompt=None, extra_pnginfo=None):
+
+            # Referenzbilder zusammenstellen (nur vorhandene)
+            image_paths = [image_ref_1.image_path]
+            if image_ref_2 is not None:
+                image_paths.append(image_ref_2.image_path)
+            if image_ref_3 is not None:
+                image_paths.append(image_ref_3.image_path)
+
+            generated = generate_flux2_edit(
+                prompt=prompt, seed=seed,
+                width=width, height=height,
+                steps=steps, guidance=guidance,
+                quantize=quantize,
+                image_paths=image_paths,
+                image_strength=image_strength,
+                Local_model=Local_model,
+                Loras=Loras,
+            )
+
+            if metadata:
+                lora_paths, lora_scales = get_lora_info(Loras)
+                save_images_with_metadata(
+                    images=generated, prompt=prompt, model=model, quantize=quantize,
+                    Local_model=Local_model, seed=seed, height=height, width=width,
+                    steps=steps, guidance=guidance,
+                    image_path=image_ref_1.image_path,
+                    image_strength=image_strength,
+                    lora_paths=lora_paths, lora_scales=lora_scales,
+                    filename_prefix="Mflux_Flux2Edit",
+                    full_prompt=full_prompt, extra_pnginfo=extra_pnginfo,
+                    extra_meta={
+                        "variant": "flux2-edit",
+                        "num_reference_images": len(image_paths),
+                    },
+                )
+            return generated

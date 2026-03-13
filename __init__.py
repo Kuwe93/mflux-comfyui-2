@@ -79,6 +79,11 @@ if HAS_KONTEXT:
     NODE_CLASS_MAPPINGS["MfluxKontextNode"] = MfluxKontextNode
     NODE_DISPLAY_NAME_MAPPINGS["MfluxKontextNode"] = "MFlux Kontext (Image Editing)"
 
+if HAS_FLUX2_EDIT:
+    from .Mflux_Comfy.Mflux_Air import MfluxFlux2EditNode
+    NODE_CLASS_MAPPINGS["MfluxFlux2EditNode"] = MfluxFlux2EditNode
+    NODE_DISPLAY_NAME_MAPPINGS["MfluxFlux2EditNode"] = "MFlux FLUX.2 Edit (Multi-Image)"
+
 if HAS_QWEN:
     from .Mflux_Comfy.Mflux_Air import MfluxQwenNode, MfluxQwenEditNode
     NODE_CLASS_MAPPINGS["MfluxQwenNode"] = MfluxQwenNode
