@@ -1,0 +1,176 @@
+{
+  "last_node_id": 3,
+  "last_link_id": 2,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "MfluxImageRefLoader",
+      "pos": {
+        "0": 28,
+        "1": 60
+      },
+      "size": {
+        "0": 315,
+        "1": 180
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image_tensor1",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "image_tensor2",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image_ref",
+          "type": "MfluxImageRefPipeline",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [],
+          "slot_index": 1
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MfluxImageRefLoader"
+      },
+      "widgets_values": [
+        "placeholder.png",
+        "None",
+        "None",
+        "None"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "MfluxKontextNode",
+      "pos": {
+        "0": 376,
+        "1": 60
+      },
+      "size": {
+        "0": 400,
+        "1": 370
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image_ref",
+          "type": "MfluxImageRefPipeline",
+          "link": 1
+        },
+        {
+          "name": "Local_model",
+          "type": "PATH",
+          "link": null
+        },
+        {
+          "name": "Loras",
+          "type": "MfluxLorasPipeline",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MfluxKontextNode"
+      },
+      "widgets_values": [
+        "Change the background to a sunset beach",
+        "4",
+        -1,
+        1024,
+        1024,
+        25,
+        2.5,
+        true
+      ]
+    },
+    {
+      "id": 3,
+      "type": "PreviewImage",
+      "pos": {
+        "0": 820,
+        "1": 60
+      },
+      "size": {
+        "0": 240,
+        "1": 270
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "MfluxImageRefPipeline"
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.0,
+      "offset": [
+        0,
+        0
+      ]
+    }
+  },
+  "version": 0.4
+}

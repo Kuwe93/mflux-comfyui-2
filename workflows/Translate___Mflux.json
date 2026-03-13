@@ -3,101 +3,6 @@
   "last_link_id": 2,
   "nodes": [
     {
-      "id": 2,
-      "type": "QuickMfluxNode",
-      "pos": {
-        "0": 463,
-        "1": 61
-      },
-      "size": {
-        "0": 400,
-        "1": 336
-      },
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "lora_files",
-          "type": "LIST",
-          "link": null,
-          "label": "lora_files"
-        },
-        {
-          "name": "ControlNet",
-          "type": "MfluxControlNetPipeline",
-          "link": null,
-          "label": "ControlNet"
-        },
-        {
-          "name": "prompt",
-          "type": "STRING",
-          "link": 1,
-          "widget": {
-            "name": "prompt"
-          },
-          "label": "prompt"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            2
-          ],
-          "slot_index": 0,
-          "shape": 3,
-          "label": "IMAGE"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "QuickMfluxNode"
-      },
-      "widgets_values": [
-        "Luxury food photograph",
-        "schnell",
-        "flux.1-schnell-mflux-4bit",
-        656585466532514,
-        "randomize",
-        512,
-        512,
-        2,
-        3.5,
-        "false",
-        "",
-        true
-      ]
-    },
-    {
-      "id": 3,
-      "type": "PreviewImage",
-      "pos": {
-        "0": 901,
-        "1": 60
-      },
-      "size": {
-        "0": 210,
-        "1": 246
-      },
-      "flags": {},
-      "order": 2,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 2,
-          "label": "图像"
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "PreviewImage"
-      },
-      "widgets_values": []
-    },
-    {
       "id": 1,
       "type": "ArgosTranslateTextNode",
       "pos": {
@@ -120,8 +25,7 @@
             1
           ],
           "slot_index": 0,
-          "shape": 3,
-          "label": "文本"
+          "shape": 3
         }
       ],
       "properties": {
@@ -130,9 +34,105 @@
       "widgets_values": [
         "chinese",
         "english",
-        "明月松间照，清泉石上流。",
+        "\u660e\u6708\u677e\u95f4\u7167\uff0c\u6e05\u6cc9\u77f3\u4e0a\u6d41\u3002",
         true
       ]
+    },
+    {
+      "id": 2,
+      "type": "QuickMfluxNode",
+      "pos": {
+        "0": 463,
+        "1": 61
+      },
+      "size": {
+        "0": 400,
+        "1": 370
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Local_model",
+          "type": "PATH",
+          "link": null
+        },
+        {
+          "name": "Loras",
+          "type": "MfluxLorasPipeline",
+          "link": null
+        },
+        {
+          "name": "img2img",
+          "type": "MfluxImg2ImgPipeline",
+          "link": null
+        },
+        {
+          "name": "ControlNet",
+          "type": "MfluxControlNetPipeline",
+          "link": null
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "link": 1,
+          "widget": {
+            "name": "prompt"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "QuickMfluxNode"
+      },
+      "widgets_values": [
+        "Luxury food photograph",
+        "schnell",
+        "4",
+        -1,
+        512,
+        512,
+        2,
+        3.5,
+        true
+      ]
+    },
+    {
+      "id": 3,
+      "type": "PreviewImage",
+      "pos": {
+        "0": 901,
+        "1": 60
+      },
+      "size": {
+        "0": 240,
+        "1": 270
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
     }
   ],
   "links": [
@@ -141,7 +141,7 @@
       1,
       0,
       2,
-      2,
+      4,
       "STRING"
     ],
     [
@@ -157,10 +157,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 1.2284597357367277,
+      "scale": 1.0,
       "offset": [
-        25.90558087874367,
-        28.985363606324412
+        0,
+        0
       ]
     }
   },

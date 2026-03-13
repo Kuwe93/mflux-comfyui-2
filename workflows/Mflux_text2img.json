@@ -1,42 +1,41 @@
 {
-  "last_node_id": 9,
-  "last_link_id": 6,
+  "last_node_id": 2,
+  "last_link_id": 1,
   "nodes": [
     {
-      "id": 7,
+      "id": 1,
       "type": "QuickMfluxNode",
       "pos": {
         "0": 32,
-        "1": 59
+        "1": 60
       },
       "size": {
         "0": 400,
-        "1": 332
+        "1": 370
       },
       "flags": {},
       "order": 0,
       "mode": 0,
       "inputs": [
         {
-          "name": "Local_models",
+          "name": "Local_model",
           "type": "PATH",
-          "link": null,
-          "shape": 7,
-          "label": "Local_models"
+          "link": null
         },
         {
           "name": "Loras",
           "type": "MfluxLorasPipeline",
-          "link": null,
-          "shape": 7,
-          "label": "Loras"
+          "link": null
+        },
+        {
+          "name": "img2img",
+          "type": "MfluxImg2ImgPipeline",
+          "link": null
         },
         {
           "name": "ControlNet",
           "type": "MfluxControlNetPipeline",
-          "link": null,
-          "shape": 7,
-          "label": "ControlNet"
+          "link": null
         }
       ],
       "outputs": [
@@ -44,9 +43,8 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            5
+            1
           ],
-          "label": "IMAGE",
           "slot_index": 0
         }
       ],
@@ -57,27 +55,25 @@
         "Luxury food photograph",
         "schnell",
         "4",
-        92876610272781,
-        "randomize",
+        -1,
         512,
         512,
         2,
         3.5,
-        "false",
         true
       ]
     },
     {
-      "id": 8,
+      "id": 2,
       "type": "PreviewImage",
       "pos": {
-        "0": 465,
+        "0": 470,
         "1": 60
       },
-      "size": [
-        210,
-        246
-      ],
+      "size": {
+        "0": 240,
+        "1": 270
+      },
       "flags": {},
       "order": 1,
       "mode": 0,
@@ -85,22 +81,22 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 5,
-          "label": "图像"
+          "link": 1
         }
       ],
       "outputs": [],
       "properties": {
         "Node name for S&R": "PreviewImage"
-      }
+      },
+      "widgets_values": []
     }
   ],
   "links": [
     [
-      5,
-      7,
+      1,
+      1,
       0,
-      8,
+      2,
       0,
       "IMAGE"
     ]
@@ -109,10 +105,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 1.2284597357367277,
+      "scale": 1.0,
       "offset": [
-        24.56912269045404,
-        25.075847400889575
+        0,
+        0
       ]
     }
   },

@@ -9,6 +9,7 @@ from .Mflux_Core import (
     MODEL_FAMILY_MAP,
     ALL_QUANTIZE_OPTIONS,
     FLUX2_DISTILLED_MODELS,
+    NEGATIVE_PROMPT_MODELS,
     HAS_FILL, HAS_DEPTH, HAS_REDUX, HAS_KONTEXT, HAS_QWEN,
     HAS_FLUX2, HAS_FLUX2_EDIT, HAS_ZIMAGE, HAS_IN_CONTEXT,
     HAS_FIBO, HAS_SEEDVR2,
@@ -387,6 +388,14 @@ class QuickMfluxNode:
                 "metadata": ("BOOLEAN", {"default": True, "label_on": "True", "label_off": "False"}),
             },
             "optional": {
+                "negative_prompt": ("STRING", {
+                    "multiline": True,
+                    "default": "",
+                    "tooltip": (
+                        "Negative prompt – only effective for models with CFG support "
+                        "(z-image-base, qwen-image). Ignored for FLUX.1, FLUX.2 and Z-Image-Turbo."
+                    ),
+                }),
                 "Local_model": ("PATH",),
                 "Loras":       ("MfluxLorasPipeline",),
                 "img2img":     ("MfluxImg2ImgPipeline",),
@@ -400,20 +409,26 @@ class QuickMfluxNode:
     RETURN_TYPES = ("IMAGE",)
     CATEGORY = "MFlux/Air"
     FUNCTION = "generate"
-
+ 
     def generate(self, prompt, model, seed, width, height, steps, guidance,
-                 quantize="None", metadata=True, Local_model="",
-                 img2img=None, Loras=None, ControlNet=None,
+                 quantize="None", metadata=True, negative_prompt="",
+                 Local_model="", img2img=None, Loras=None, ControlNet=None,
                  full_prompt=None, extra_pnginfo=None):
+        # Negative prompt nur weitergeben wenn das Modell CFG unterstützt
+        family, alias = resolve_model_alias(model, Local_model)
+        supports_neg = (family == "qwen") or (family == "zimage" and alias == "z-image-base")
+        neg = negative_prompt.strip() if supports_neg and negative_prompt else ""
+ 
         generated = generate_image(
             prompt, model, seed, width, height, steps, guidance,
             quantize, metadata, Local_model, img2img, Loras, ControlNet,
+            negative_prompt=neg,
         )
         if metadata:
             image_path     = img2img.image_path     if img2img else None
             image_strength = img2img.image_strength if img2img else None
             lora_paths, lora_scales = get_lora_info(Loras)
-            _, alias = resolve_model_alias(model, Local_model)
+            extra = {"negative_prompt": neg} if neg else None
             save_images_with_metadata(
                 images=generated, prompt=prompt, model=alias, quantize=quantize,
                 Local_model=Local_model, seed=seed, height=height, width=width,
@@ -421,9 +436,10 @@ class QuickMfluxNode:
                 image_strength=image_strength, lora_paths=lora_paths,
                 lora_scales=lora_scales, filename_prefix="Mflux",
                 full_prompt=full_prompt, extra_pnginfo=extra_pnginfo,
+                extra_meta=extra,
             )
         return generated
-
+ 
 if HAS_FILL:
     class MfluxFillNode:
         @classmethod
@@ -449,7 +465,7 @@ if HAS_FILL:
         RETURN_TYPES = ("IMAGE",)
         CATEGORY = "MFlux/Air"
         FUNCTION = "run"
-
+ 
         def run(self, prompt, fill, quantize, seed, width, height, steps, guidance,
                 metadata=True, Local_model="", Loras=None,
                 full_prompt=None, extra_pnginfo=None):
@@ -469,7 +485,7 @@ if HAS_FILL:
                     extra_meta={"mask_path": fill.mask_path, "variant": "fill"},
                 )
             return generated
-
+ 
 if HAS_DEPTH:
     class MfluxDepthNode:
         @classmethod
@@ -495,7 +511,7 @@ if HAS_DEPTH:
         RETURN_TYPES = ("IMAGE",)
         CATEGORY = "MFlux/Air"
         FUNCTION = "run"
-
+ 
         def run(self, prompt, image_ref, quantize, seed, width, height, steps, guidance,
                 metadata=True, Local_model="", Loras=None,
                 full_prompt=None, extra_pnginfo=None):
@@ -514,7 +530,7 @@ if HAS_DEPTH:
                     extra_pnginfo=extra_pnginfo, extra_meta={"variant": "depth"},
                 )
             return generated
-
+ 
 if HAS_REDUX:
     class MfluxReduxNode:
         @classmethod
@@ -536,7 +552,7 @@ if HAS_REDUX:
         RETURN_TYPES = ("IMAGE",)
         CATEGORY = "MFlux/Air"
         FUNCTION = "run"
-
+ 
         def run(self, image_ref, quantize, seed, width, height, steps, guidance,
                 metadata=True, Local_model="", full_prompt=None, extra_pnginfo=None):
             generated = generate_redux(
@@ -553,7 +569,7 @@ if HAS_REDUX:
                     extra_pnginfo=extra_pnginfo, extra_meta={"variant": "redux"},
                 )
             return generated
-
+ 
 if HAS_KONTEXT:
     class MfluxKontextNode:
         @classmethod
@@ -580,7 +596,7 @@ if HAS_KONTEXT:
         RETURN_TYPES = ("IMAGE",)
         CATEGORY = "MFlux/Air"
         FUNCTION = "run"
-
+ 
         def run(self, prompt, image_ref, quantize, seed, width, height, steps, guidance,
                 metadata=True, Local_model="", Loras=None,
                 full_prompt=None, extra_pnginfo=None):
@@ -599,7 +615,7 @@ if HAS_KONTEXT:
                     extra_pnginfo=extra_pnginfo, extra_meta={"variant": "kontext"},
                 )
             return generated
-
+ 
 if HAS_QWEN:
     class MfluxQwenNode:
         @classmethod
@@ -627,7 +643,7 @@ if HAS_QWEN:
         RETURN_TYPES = ("IMAGE",)
         CATEGORY = "MFlux/Air"
         FUNCTION = "run"
-
+ 
         def run(self, prompt, negative_prompt, quantize, seed, width, height, steps,
                 guidance, metadata=True, Local_model="", Loras=None,
                 full_prompt=None, extra_pnginfo=None):
@@ -647,7 +663,7 @@ if HAS_QWEN:
                     extra_meta={"negative_prompt": negative_prompt, "variant": "qwen"},
                 )
             return generated
-
+ 
     class MfluxQwenEditNode:
         @classmethod
         def INPUT_TYPES(cls):
@@ -673,7 +689,7 @@ if HAS_QWEN:
         RETURN_TYPES = ("IMAGE",)
         CATEGORY = "MFlux/Air"
         FUNCTION = "run"
-
+ 
         def run(self, prompt, image_ref, quantize, seed, width, height, steps, guidance,
                 metadata=True, Local_model="", Loras=None,
                 full_prompt=None, extra_pnginfo=None):

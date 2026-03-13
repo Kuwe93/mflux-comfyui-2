@@ -1,12 +1,12 @@
 {
-  "last_node_id": 7,
-  "last_link_id": 6,
+  "last_node_id": 4,
+  "last_link_id": 3,
   "nodes": [
     {
-      "id": 3,
+      "id": 1,
       "type": "MfluxModelsLoader",
       "pos": {
-        "0": 29,
+        "0": 28,
         "1": 57
       },
       "size": {
@@ -22,9 +22,8 @@
           "name": "Local_model",
           "type": "PATH",
           "links": [
-            2
-          ],
-          "label": "Local_model"
+            1
+          ]
         }
       ],
       "properties": {
@@ -35,15 +34,66 @@
       ]
     },
     {
-      "id": 1,
+      "id": 2,
+      "type": "MfluxImg2Img",
+      "pos": {
+        "0": 28,
+        "1": 160
+      },
+      "size": {
+        "0": 315,
+        "1": 130
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image_tensor",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "img2img",
+          "type": "MfluxImg2ImgPipeline",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [],
+          "slot_index": 1
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MfluxImg2Img"
+      },
+      "widgets_values": [
+        "placeholder.png",
+        0.4
+      ]
+    },
+    {
+      "id": 3,
       "type": "QuickMfluxNode",
       "pos": {
         "0": 376,
-        "1": 58
+        "1": 60
       },
       "size": {
         "0": 400,
-        "1": 357
+        "1": 370
       },
       "flags": {},
       "order": 2,
@@ -52,30 +102,22 @@
         {
           "name": "Local_model",
           "type": "PATH",
-          "link": 2,
-          "shape": 7,
-          "label": "Local_model"
-        },
-        {
-          "name": "image",
-          "type": "MfluxImagePipeline",
-          "link": 6,
-          "shape": 7,
-          "label": "image"
+          "link": 1
         },
         {
           "name": "Loras",
           "type": "MfluxLorasPipeline",
-          "link": null,
-          "shape": 7,
-          "label": "Loras"
+          "link": null
+        },
+        {
+          "name": "img2img",
+          "type": "MfluxImg2ImgPipeline",
+          "link": 2
         },
         {
           "name": "ControlNet",
           "type": "MfluxControlNetPipeline",
-          "link": null,
-          "shape": 7,
-          "label": "ControlNet"
+          "link": null
         }
       ],
       "outputs": [
@@ -85,8 +127,7 @@
           "links": [
             3
           ],
-          "slot_index": 0,
-          "label": "IMAGE"
+          "slot_index": 0
         }
       ],
       "properties": {
@@ -94,15 +135,13 @@
       },
       "widgets_values": [
         "Luxury food photograph",
-        "schnell",
+        "dev",
         "4",
-        1125899906842624,
-        "fixed",
-        512,
-        512,
-        30,
+        -1,
+        1024,
+        1024,
+        25,
         3.5,
-        true,
         true
       ]
     },
@@ -114,8 +153,8 @@
         "1": 60
       },
       "size": {
-        "0": 210,
-        "1": 246
+        "0": 240,
+        "1": 270
       },
       "flags": {},
       "order": 3,
@@ -124,8 +163,7 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 3,
-          "label": "图像"
+          "link": 3
         }
       ],
       "outputs": [],
@@ -133,89 +171,42 @@
         "Node name for S&R": "PreviewImage"
       },
       "widgets_values": []
-    },
-    {
-      "id": 7,
-      "type": "MfluxLodeImage",
-      "pos": {
-        "0": 34,
-        "1": 187
-      },
-      "size": [
-        315,
-        358
-      ],
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "image",
-          "type": "MfluxImagePipeline",
-          "links": [
-            6
-          ],
-          "label": "image",
-          "slot_index": 0
-        },
-        {
-          "name": "width",
-          "type": "INT",
-          "links": null,
-          "label": "width"
-        },
-        {
-          "name": "height",
-          "type": "INT",
-          "links": null,
-          "label": "height"
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "MfluxLodeImage"
-      },
-      "widgets_values": [
-        "IMG_0198.jpeg",
-        0.24,
-        "image"
-      ]
     }
   ],
   "links": [
     [
-      2,
-      3,
-      0,
       1,
+      1,
+      0,
+      3,
       0,
       "PATH"
     ],
     [
+      2,
+      2,
+      0,
       3,
-      1,
+      2,
+      "MfluxImg2ImgPipeline"
+    ],
+    [
+      3,
+      3,
       0,
       4,
       0,
       "IMAGE"
-    ],
-    [
-      6,
-      7,
-      0,
-      1,
-      1,
-      "MfluxImagePipeline"
     ]
   ],
   "groups": [],
   "config": {},
   "extra": {
     "ds": {
-      "scale": 1.0152559799477054,
+      "scale": 1.0,
       "offset": [
-        65.60323847105522,
-        65.08020389873201
+        0,
+        0
       ]
     }
   },

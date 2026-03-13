@@ -1,101 +1,9 @@
 {
-  "last_node_id": 4,
+  "last_node_id": 3,
   "last_link_id": 2,
   "nodes": [
     {
-      "id": 2,
-      "type": "QuickMfluxNode",
-      "pos": {
-        "0": 372,
-        "1": 60
-      },
-      "size": {
-        "0": 400,
-        "1": 332
-      },
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "Local_models",
-          "type": "PATH",
-          "link": 1,
-          "shape": 7,
-          "label": "Local_models"
-        },
-        {
-          "name": "Loras",
-          "type": "MfluxLorasPipeline",
-          "link": null,
-          "shape": 7,
-          "label": "Loras"
-        },
-        {
-          "name": "ControlNet",
-          "type": "MfluxControlNetPipeline",
-          "link": null,
-          "shape": 7,
-          "label": "ControlNet"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "IMAGE",
-          "type": "IMAGE",
-          "links": [
-            2
-          ],
-          "label": "IMAGE",
-          "slot_index": 0
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "QuickMfluxNode"
-      },
-      "widgets_values": [
-        "Luxury food photograph",
-        "schnell",
-        "None",
-        166089506520211,
-        "randomize",
-        512,
-        512,
-        2,
-        3.5,
-        "false",
-        true
-      ]
-    },
-    {
-      "id": 4,
-      "type": "PreviewImage",
-      "pos": {
-        "0": 800,
-        "1": 62
-      },
-      "size": [
-        210,
-        246
-      ],
-      "flags": {},
-      "order": 2,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "images",
-          "type": "IMAGE",
-          "link": 2,
-          "label": "图像"
-        }
-      ],
-      "outputs": [],
-      "properties": {
-        "Node name for S&R": "PreviewImage"
-      }
-    },
-    {
-      "id": 3,
+      "id": 1,
       "type": "MfluxModelsLoader",
       "pos": {
         "0": 28,
@@ -111,12 +19,11 @@
       "inputs": [],
       "outputs": [
         {
-          "name": "Local_models",
+          "name": "Local_model",
           "type": "PATH",
           "links": [
             1
-          ],
-          "label": "Local_models"
+          ]
         }
       ],
       "properties": {
@@ -125,12 +32,100 @@
       "widgets_values": [
         "flux.1-schnell-mflux-4bit"
       ]
+    },
+    {
+      "id": 2,
+      "type": "QuickMfluxNode",
+      "pos": {
+        "0": 376,
+        "1": 60
+      },
+      "size": {
+        "0": 400,
+        "1": 370
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "Local_model",
+          "type": "PATH",
+          "link": 1
+        },
+        {
+          "name": "Loras",
+          "type": "MfluxLorasPipeline",
+          "link": null
+        },
+        {
+          "name": "img2img",
+          "type": "MfluxImg2ImgPipeline",
+          "link": null
+        },
+        {
+          "name": "ControlNet",
+          "type": "MfluxControlNetPipeline",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "QuickMfluxNode"
+      },
+      "widgets_values": [
+        "Luxury food photograph",
+        "schnell",
+        "4",
+        -1,
+        512,
+        512,
+        2,
+        3.5,
+        true
+      ]
+    },
+    {
+      "id": 3,
+      "type": "PreviewImage",
+      "pos": {
+        "0": 810,
+        "1": 62
+      },
+      "size": {
+        "0": 240,
+        "1": 270
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
     }
   ],
   "links": [
     [
       1,
-      3,
+      1,
       0,
       2,
       0,
@@ -140,7 +135,7 @@
       2,
       2,
       0,
-      4,
+      3,
       0,
       "IMAGE"
     ]
@@ -149,10 +144,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 1.3513057093104006,
+      "scale": 1.0,
       "offset": [
-        34.263450117431965,
-        33.06811734068839
+        0,
+        0
       ]
     }
   },

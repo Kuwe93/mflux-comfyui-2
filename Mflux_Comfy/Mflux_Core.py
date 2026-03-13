@@ -318,7 +318,8 @@ def load_or_create_model(model, quantize, local_path, lora_paths, lora_scales,
 
 def generate_image(prompt, model, seed, width, height, steps, guidance,
                    quantize="None", metadata=True, Local_model="",
-                   image=None, Loras=None, ControlNet=None):
+                   image=None, Loras=None, ControlNet=None,
+                   negative_prompt=""):
     seed = random.randint(0, 0xFFFFFFFFFFFFFFFF) if seed == -1 else int(seed)
     print(f"[Mflux] seed={seed}")
     lora_paths, lora_scales = get_lora_info(Loras)
@@ -326,10 +327,10 @@ def generate_image(prompt, model, seed, width, height, steps, guidance,
     image_path = image.image_path if image else None
     image_strength = image.image_strength if image else None
     use_controlnet = ControlNet is not None and isinstance(ControlNet, MfluxControlNetPipeline)
-
+ 
     if alias in FLUX2_DISTILLED_MODELS:
         guidance = 1.0
-
+ 
     if use_controlnet:
         from mflux.post_processing.array_util import ArrayUtil
         import mlx.core as mx
@@ -388,9 +389,9 @@ def generate_image(prompt, model, seed, width, height, steps, guidance,
         if tensor.dim() == 3:
             tensor = tensor.unsqueeze(0)
         return (tensor,)
-
+ 
     inst = load_or_create_model(model, quantize, Local_model, lora_paths, lora_scales)
-
+ 
     gen_kwargs = {
         "prompt": prompt,
         "seed": seed,
@@ -399,11 +400,22 @@ def generate_image(prompt, model, seed, width, height, steps, guidance,
         "height": height,
         "guidance": guidance,
     }
-
+ 
+    # negative_prompt nur für Modelle mit CFG-Unterstützung
+    # Bei zimage zusätzlich alias prüfen: Turbo hat kein CFG, Base schon
+    if negative_prompt and negative_prompt.strip():
+        if family == "qwen" or (family == "zimage" and alias == "z-image-base"):
+            gen_kwargs["negative_prompt"] = negative_prompt.strip()
+ 
+    # img2img params
+    if image_path:
+        gen_kwargs["init_image_path"] = image_path
+        gen_kwargs["init_image_strength"] = image_strength
+ 
     generated = inst.generate_image(**gen_kwargs)
     return (_tensor_from_image(generated),)
-
-
+ 
+ 
 def generate_fill(prompt, seed, width, height, steps, guidance, quantize,
                   image_path, mask_path, Local_model="", Loras=None):
     if not HAS_FILL:
@@ -417,8 +429,8 @@ def generate_fill(prompt, seed, width, height, steps, guidance, quantize,
         image_path=image_path, mask_path=mask_path,
     )
     return (_tensor_from_image(generated),)
-
-
+ 
+ 
 def generate_depth(prompt, seed, width, height, steps, guidance, quantize,
                    image_path, Local_model="", Loras=None):
     if not HAS_DEPTH:
@@ -432,8 +444,8 @@ def generate_depth(prompt, seed, width, height, steps, guidance, quantize,
         image_path=image_path,
     )
     return (_tensor_from_image(generated),)
-
-
+ 
+ 
 def generate_redux(seed, width, height, steps, guidance, quantize,
                    image_path, Local_model=""):
     if not HAS_REDUX:
@@ -446,8 +458,8 @@ def generate_redux(seed, width, height, steps, guidance, quantize,
         image_path=image_path,
     )
     return (_tensor_from_image(generated),)
-
-
+ 
+ 
 def generate_kontext(prompt, seed, width, height, steps, guidance, quantize,
                      image_path, Local_model="", Loras=None):
     if not HAS_KONTEXT:
@@ -462,8 +474,8 @@ def generate_kontext(prompt, seed, width, height, steps, guidance, quantize,
         image_path=image_path,
     )
     return (_tensor_from_image(generated),)
-
-
+ 
+ 
 def generate_qwen(prompt, negative_prompt, seed, width, height, steps, guidance,
                   quantize, Local_model="", Loras=None):
     if not HAS_QWEN:
@@ -478,8 +490,8 @@ def generate_qwen(prompt, negative_prompt, seed, width, height, steps, guidance,
         width=width, height=height, guidance=guidance,
     )
     return (_tensor_from_image(generated),)
-
-
+ 
+ 
 def generate_qwen_edit(prompt, seed, width, height, steps, guidance, quantize,
                        image_paths: list, Local_model="", Loras=None):
     if not HAS_QWEN:
@@ -513,19 +525,19 @@ def save_images_with_metadata(
     )
     mflux_output_folder = os.path.join(full_output_folder, "MFlux")
     os.makedirs(mflux_output_folder, exist_ok=True)
-
+ 
     existing_counters = [
         int(f.split("_")[-1].split(".")[0])
         for f in os.listdir(mflux_output_folder)
         if f.startswith(filename_prefix) and f.endswith(".png")
     ]
     counter = max(existing_counters, default=0) + 1
-
+ 
     results = []
     for image in images:
         i = 255.0 * image.cpu().numpy().squeeze()
         img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
-
+ 
         png_meta = None
         if full_prompt is not None or extra_pnginfo is not None:
             png_meta = PngInfo()
@@ -534,11 +546,11 @@ def save_images_with_metadata(
             if extra_pnginfo is not None:
                 for x in extra_pnginfo:
                     png_meta.add_text(x, json.dumps(extra_pnginfo[x]))
-
+ 
         image_file = f"{filename_prefix}_{counter:05}.png"
         img.save(os.path.join(mflux_output_folder, image_file), pnginfo=png_meta, compress_level=4)
         results.append({"filename": image_file, "subfolder": subfolder, "type": "output"})
-
+ 
         family, alias = resolve_model_alias(model, Local_model)
         json_dict = {
             "prompt": prompt, "model": model, "model_family": family,
@@ -551,9 +563,9 @@ def save_images_with_metadata(
         }
         if extra_meta:
             json_dict.update(extra_meta)
-
+ 
         with open(os.path.join(mflux_output_folder, f"{filename_prefix}_{counter:05}.json"), "w") as f:
             json.dump(json_dict, f, indent=4)
         counter += 1
-
+ 
     return {"ui": {"images": results}, "counter": counter}
