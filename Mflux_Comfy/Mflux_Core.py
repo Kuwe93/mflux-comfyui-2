@@ -6,13 +6,13 @@ import torch
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 import folder_paths
-
+ 
 # ---------------------------------------------------------------------------
 # mflux 0.16.x Imports
 # Alle Imports die über FLUX.1 hinausgehen werden defensiv behandelt,
 # da mflux regelmäßig neue Modellklassen hinzufügt und die Pfade sich ändern.
 # ---------------------------------------------------------------------------
-
+ 
 # ── Immer verfügbar (FLUX.1-Kern) ──────────────────────────────────────────
 from mflux.models.common.config.model_config import ModelConfig
 from mflux.models.flux.variants.txt2img.flux import Flux1
@@ -20,7 +20,7 @@ from mflux.models.flux.variants.controlnet.flux_controlnet import Flux1Controlne
 from mflux.models.flux.latent_creator.flux_latent_creator import FluxLatentCreator
 from mflux.utils.image_util import ImageUtil
 from mflux.models.flux.variants.controlnet.controlnet_util import ControlnetUtil
-
+ 
 # ── FLUX.1-Varianten (seit ~0.9) ───────────────────────────────────────────
 try:
     from mflux.models.flux.variants.fill.flux_fill import Flux1Fill
@@ -28,28 +28,28 @@ try:
 except ImportError:
     HAS_FILL = False
     print("[Mflux] Flux1Fill not available")
-
+ 
 try:
     from mflux.models.flux.variants.depth.flux_depth import Flux1Depth
     HAS_DEPTH = True
 except ImportError:
     HAS_DEPTH = False
     print("[Mflux] Flux1Depth not available")
-
+ 
 try:
     from mflux.models.flux.variants.redux.flux_redux import Flux1Redux
     HAS_REDUX = True
 except ImportError:
     HAS_REDUX = False
     print("[Mflux] Flux1Redux not available")
-
+ 
 try:
     from mflux.models.flux.variants.kontext.flux_kontext import Flux1Kontext
     HAS_KONTEXT = True
 except ImportError:
     HAS_KONTEXT = False
     print("[Mflux] Flux1Kontext not available")
-
+ 
 # ── FLUX.2-Familie (zukünftig) ──────────────────────────────────────────────
 try:
     from mflux.models.flux2.variants.txt2img.flux2_klein import Flux2Klein
@@ -57,7 +57,7 @@ try:
 except ImportError:
     HAS_FLUX2 = False
     print("[Mflux] Flux2Klein not available")
-
+ 
 # ── Z-Image-Familie ─────────────────────────────────────────────────────────
 try:
     from mflux.models.z_image.variants.z_image import ZImage
@@ -65,7 +65,7 @@ try:
 except (ImportError, AttributeError):
     HAS_ZIMAGE = False
     print("[Mflux] ZImage not available")
-
+ 
 # ── FLUX.2 Edit ──────────────────────────────────────────────────────────────
 try:
     from mflux.models.flux2.variants.edit.flux2_klein_edit import Flux2KleinEdit
@@ -73,7 +73,7 @@ try:
 except (ImportError, AttributeError):
     HAS_FLUX2_EDIT = False
     print("[Mflux] Flux2KleinEdit not available")
-
+ 
 # ── FLUX.1 In-Context ────────────────────────────────────────────────────────
 try:
     from mflux.models.flux.variants.in_context.flux_in_context_dev import FluxInContextDev
@@ -82,7 +82,7 @@ try:
 except (ImportError, AttributeError):
     HAS_IN_CONTEXT = False
     print("[Mflux] FluxInContext not available")
-
+ 
 # ── Fibo (Bria) ──────────────────────────────────────────────────────────────
 try:
     from mflux.models.fibo.variants.txt2img.fibo import Fibo
@@ -90,7 +90,7 @@ try:
 except (ImportError, AttributeError):
     HAS_FIBO = False
     print("[Mflux] Fibo not available")
-
+ 
 # ── SeedVR2 (Upscaler) ───────────────────────────────────────────────────────
 try:
     from mflux.models.seedvr2.variants.upscale.seedvr2 import SeedVR2
@@ -98,7 +98,7 @@ try:
 except (ImportError, AttributeError):
     HAS_SEEDVR2 = False
     print("[Mflux] SeedVR2 not available")
-
+ 
 # ── Qwen-Familie ────────────────────────────────────────────────────────────
 try:
     from mflux.models.qwen.variants.txt2img.qwen_image import QwenImage
@@ -107,9 +107,9 @@ try:
 except ImportError:
     HAS_QWEN = False
     print("[Mflux] Qwen not available")
-
+ 
 from .Mflux_Pro import MfluxControlNetPipeline
-
+ 
 # ---------------------------------------------------------------------------
 # Modell-Familien-Zuordnung
 # ---------------------------------------------------------------------------
@@ -122,57 +122,61 @@ MODEL_FAMILY_MAP = {
     "flux2-klein-4b": ("flux2", "flux2-klein-4b"), 
     "flux2-klein-9b": ("flux2", "flux2-klein-9b"),
 }
-
+ 
 if HAS_ZIMAGE:
     MODEL_FAMILY_MAP.update({
         "z-image-turbo": ("zimage", "z-image-turbo"),
         "z-image-base":  ("zimage", "z-image-base"),
     })
-
+ 
 if HAS_QWEN:
     MODEL_FAMILY_MAP["qwen-image"] = ("qwen", "qwen-image")
-
+ 
 if HAS_FIBO:
     MODEL_FAMILY_MAP["fibo"] = ("fibo", "fibo")
-
+ 
 if HAS_SEEDVR2:
     MODEL_FAMILY_MAP["seedvr2"] = ("seedvr2", "seedvr2")
-
+ 
 # Distilled FLUX.2-Modelle benötigen guidance=1.0
 FLUX2_DISTILLED_MODELS = {"flux2-klein-4b", "flux2-klein-9b"}
-
+ 
+# Modelle mit nativer negative_prompt Unterstützung (CFG-basiert)
+# Z-Image-Turbo ist bewusst ausgeschlossen (distilliert, kein CFG)
+NEGATIVE_PROMPT_MODELS = {"zimage", "qwen"}
+ 
 # Exports für __init__.py und Mflux_Air.py
 __all_flags__ = [
     "HAS_FILL", "HAS_DEPTH", "HAS_REDUX", "HAS_KONTEXT", "HAS_QWEN",
     "HAS_FLUX2", "HAS_FLUX2_EDIT", "HAS_ZIMAGE", "HAS_IN_CONTEXT",
     "HAS_FIBO", "HAS_SEEDVR2",
 ]
-
+ 
 # Alle Quantisierungsoptionen
 ALL_QUANTIZE_OPTIONS = ["None", "3", "4", "5", "6", "8"]
-
+ 
 # ---------------------------------------------------------------------------
 # Model-Cache
 # ---------------------------------------------------------------------------
 _model_cache: dict = {}
-
-
+ 
+ 
 def _evict_and_store(key, instance):
     _model_cache.clear()
     _model_cache[key] = instance
     return instance
-
-
+ 
+ 
 # ---------------------------------------------------------------------------
 # Hilfsfunktionen
 # ---------------------------------------------------------------------------
-
+ 
 def get_lora_info(Loras):
     if Loras:
         return Loras.lora_paths, Loras.lora_scales
     return [], []
-
-
+ 
+ 
 def resolve_model_alias(model: str, local_path: str) -> tuple[str, str]:
     if local_path:
         name_lower = local_path.lower()
@@ -190,8 +194,8 @@ def resolve_model_alias(model: str, local_path: str) -> tuple[str, str]:
     if model in MODEL_FAMILY_MAP:
         return MODEL_FAMILY_MAP[model]
     return "flux1", model
-
-
+ 
+ 
 def _tensor_from_image(generated) -> torch.Tensor:
     if hasattr(generated, "image"):
         arr = np.array(generated.image).astype(np.float32) / 255.0
@@ -207,8 +211,8 @@ def _tensor_from_image(generated) -> torch.Tensor:
     if t.dim() == 3:
         t = t.unsqueeze(0)
     return t
-
-
+ 
+ 
 def _save_temp_image(tensor: torch.Tensor) -> str:
     import tempfile
     arr = (tensor.squeeze(0).cpu().numpy() * 255).clip(0, 255).astype(np.uint8)
@@ -216,19 +220,19 @@ def _save_temp_image(tensor: torch.Tensor) -> str:
     tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
     img.save(tmp.name)
     return tmp.name
-
-
+ 
+ 
 # ---------------------------------------------------------------------------
 # Modell laden / aus Cache holen
 # ---------------------------------------------------------------------------
-
+ 
 def load_or_create_model(model, quantize, local_path, lora_paths, lora_scales,
                          variant=""):
     family, alias = resolve_model_alias(model, local_path)
     q = None if quantize == "None" else int(quantize)
     path = local_path if local_path else None
     key = (family, alias, q, path or "", tuple(lora_paths), tuple(lora_scales), variant)
-
+ 
     print(f"[Mflux] --- MODEL ---")
     if key in _model_cache:
         print(f"[Mflux] Using CACHED model: {family} ({alias})")
@@ -244,7 +248,7 @@ def load_or_create_model(model, quantize, local_path, lora_paths, lora_scales,
     
     # Basis-Konfiguration
     m_config = ModelConfig.from_name(alias)
-
+ 
     # Wir bauen die Argumente dynamisch zusammen
     # mflux 0.16.x: Flux1 nutzt local_path, ZImage/Flux2 nutzen model_path
     common_args = {
@@ -253,7 +257,7 @@ def load_or_create_model(model, quantize, local_path, lora_paths, lora_scales,
         "lora_paths": lora_paths,
         "lora_scales": lora_scales,
     }
-
+ 
     if family == "flux1":
         # Flux1 erwartet 'model_path'
         args = {**common_args, "model_path": path}
@@ -277,18 +281,18 @@ def load_or_create_model(model, quantize, local_path, lora_paths, lora_scales,
             inst = Flux1Kontext(**args)
         else:
             inst = Flux1(**args)
-
+ 
     elif family == "flux2":
         if not HAS_FLUX2:
             raise RuntimeError("Flux2Klein not available.")
         flux2_args = {**common_args, "model_path": path}
         inst = Flux2Klein(**flux2_args)
-
+ 
     elif family == "zimage":
         # ZImage erwartet ebenfalls 'model_path'
         args = {**common_args, "model_path": path}
         inst = ZImage(**args)
-
+ 
     elif family == "qwen":
         args = {"quantize": q, "model_path": path, "lora_paths": lora_paths, "lora_scales": lora_scales}
         if variant == "edit":
@@ -299,23 +303,23 @@ def load_or_create_model(model, quantize, local_path, lora_paths, lora_scales,
         if not HAS_FIBO:
             raise RuntimeError("Fibo not available in this mflux version.")
         inst = Fibo(**{**common_args, "model_path": path})
-
+ 
     elif family == "seedvr2":
         if not HAS_SEEDVR2:
             raise RuntimeError("SeedVR2 not available in this mflux version.")
         inst = SeedVR2(**{**common_args, "model_path": path})
-
+ 
     else:
         # Fallback auf Flux1
         inst = Flux1(**{**common_args, "model_path": path})
-
+ 
     return _evict_and_store(key, inst)
-
-
+ 
+ 
 # ---------------------------------------------------------------------------
 # Generierungsfunktionen
 # ---------------------------------------------------------------------------
-
+ 
 def generate_image(prompt, model, seed, width, height, steps, guidance,
                    quantize="None", metadata=True, Local_model="",
                    image=None, Loras=None, ControlNet=None,
@@ -506,12 +510,12 @@ def generate_qwen_edit(prompt, seed, width, height, steps, guidance, quantize,
         image_paths=image_paths,
     )
     return (_tensor_from_image(generated),)
-
-
+ 
+ 
 # ---------------------------------------------------------------------------
 # Metadaten speichern
 # ---------------------------------------------------------------------------
-
+ 
 def save_images_with_metadata(
     images, prompt, model, quantize, Local_model,
     seed, height, width, steps, guidance,
@@ -569,3 +573,4 @@ def save_images_with_metadata(
         counter += 1
  
     return {"ui": {"images": results}, "counter": counter}
+ 
