@@ -390,3 +390,108 @@ class MfluxScaleFactor:
         new_h = max(r, round(h * scale_factor / r) * r)
         print(f"[MfluxScaleFactor] {w}×{h} × {scale_factor} → {new_w}×{new_h}")
         return new_w, new_h
+
+
+# ---------------------------------------------------------------------------
+# Node: MfluxMetadataLoader
+# Lädt eine .metadata.json Sidecar-Datei und gibt alle Parameter als
+# Node-Outputs weiter – direkt anschließbar an QuickMfluxNode.
+# Einzelne Werte können überschrieben werden (z.B. anderer Prompt).
+# ---------------------------------------------------------------------------
+
+class MfluxMetadataLoader:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "metadata_json_path": ("STRING", {
+                    "default": "~/image.metadata.json",
+                    "tooltip": "Pfad zur .metadata.json Datei die mflux neben dem Bild ablegt "
+                               "(z.B. image.metadata.json).",
+                }),
+            },
+            "optional": {
+                "override_prompt": ("STRING", {
+                    "multiline": True,
+                    "default": "",
+                    "tooltip": "Überschreibt den Prompt aus der Metadata. Leer = Metadata-Prompt verwenden.",
+                }),
+                "override_seed": ("INT", {
+                    "default": -1, "min": -1, "max": 0xFFFFFFFFFFFFFFFF,
+                    "tooltip": "Überschreibt den Seed. -1 = Seed aus der Metadata verwenden.",
+                }),
+                "override_steps": ("INT", {
+                    "default": -1, "min": -1, "max": 200,
+                    "tooltip": "Überschreibt die Steps. -1 = Steps aus der Metadata verwenden.",
+                }),
+                "override_guidance": ("FLOAT", {
+                    "default": -1.0, "min": -1.0, "max": 20.0, "step": 0.5,
+                    "tooltip": "Überschreibt Guidance. -1.0 = Metadata-Wert verwenden.",
+                }),
+                "override_width": ("INT", {
+                    "default": -1, "min": -1, "max": 4096,
+                    "tooltip": "Überschreibt Width. -1 = Metadata-Wert verwenden.",
+                }),
+                "override_height": ("INT", {
+                    "default": -1, "min": -1, "max": 4096,
+                    "tooltip": "Überschreibt Height. -1 = Metadata-Wert verwenden.",
+                }),
+            },
+        }
+
+    CATEGORY = "MFlux/Pro"
+    RETURN_TYPES = ("STRING", "STRING", "STRING", "INT",   "INT",   "INT",   "FLOAT",    "INT")
+    RETURN_NAMES = ("prompt", "model",  "quantize","seed", "width", "height","guidance", "steps")
+    FUNCTION = "load_metadata"
+
+    def load_metadata(self, metadata_json_path,
+                      override_prompt="", override_seed=-1, override_steps=-1,
+                      override_guidance=-1.0, override_width=-1, override_height=-1):
+        import json as _json
+
+        path = os.path.expanduser(metadata_json_path.strip())
+        if not os.path.exists(path):
+            raise ValueError(f"[MfluxMetadataLoader] Datei nicht gefunden: {path}")
+
+        with open(path) as f:
+            meta = _json.load(f)
+
+        print(f"[MfluxMetadataLoader] Loaded: {path}")
+        print(f"[MfluxMetadataLoader] Metadata: {_json.dumps(meta, indent=2)}")
+
+        # Werte aus Metadata lesen (mit sinnvollen Fallbacks)
+        prompt   = str(meta.get("prompt",   ""))
+        model    = str(meta.get("model",    "schnell"))
+        quantize = str(meta.get("quantize", "4"))
+        seed     = int(meta.get("seed",     -1))
+        width    = int(meta.get("width",    512))
+        height   = int(meta.get("height",   512))
+        guidance = float(meta.get("guidance", 3.5))
+        steps    = int(meta.get("steps",    4))
+
+        # Overrides anwenden
+        if override_prompt and override_prompt.strip():
+            prompt = override_prompt.strip()
+            print(f"[MfluxMetadataLoader] Prompt overridden.")
+        if override_seed != -1:
+            seed = override_seed
+        if override_steps != -1:
+            steps = override_steps
+        if override_guidance != -1.0:
+            guidance = override_guidance
+        if override_width != -1:
+            width = override_width
+        if override_height != -1:
+            height = override_height
+
+        print(f"[MfluxMetadataLoader] Final: model={model}, seed={seed}, "
+              f"{width}×{height}, steps={steps}, guidance={guidance}")
+
+        return (prompt, model, quantize, seed, width, height, guidance, steps)
+
+    @classmethod
+    def IS_CHANGED(cls, metadata_json_path, **kwargs):
+        path = os.path.expanduser(metadata_json_path.strip())
+        if os.path.exists(path):
+            return os.path.getmtime(path)
+        return float("nan")

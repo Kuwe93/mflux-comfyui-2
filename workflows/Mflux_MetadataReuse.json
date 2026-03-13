@@ -1,0 +1,348 @@
+{
+  "last_node_id": 3,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Note",
+      "pos": [
+        20,
+        20
+      ],
+      "size": [
+        500,
+        130
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "title": "Anleitung",
+      "widgets_values": [
+        "Metadata Reuse Workflow\n\n1. Setze metadata_json_path auf die .metadata.json Datei\n   die mflux neben dem generierten Bild ablegt\n\n2. Optional: Überschreibe Prompt, Seed, Steps, Guidance,\n   Width oder Height für Variationen\n\n3. Alle anderen Parameter (model, quantize etc.) kommen\n   automatisch aus der Metadata"
+      ],
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "color": "#223333",
+      "bgcolor": "#223333"
+    },
+    {
+      "id": 2,
+      "type": "MfluxMetadataLoader",
+      "pos": [
+        20,
+        170
+      ],
+      "size": [
+        400,
+        320
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "title": "Metadata Loader",
+      "widgets_values": [
+        "~/image.metadata.json",
+        "",
+        -1,
+        -1,
+        -1.0,
+        -1,
+        -1
+      ],
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "model",
+          "type": "STRING",
+          "links": [
+            2
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "quantize",
+          "type": "STRING",
+          "links": [
+            3
+          ],
+          "slot_index": 2
+        },
+        {
+          "name": "seed",
+          "type": "INT",
+          "links": [
+            4
+          ],
+          "slot_index": 3
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [
+            5
+          ],
+          "slot_index": 4
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [
+            6
+          ],
+          "slot_index": 5
+        },
+        {
+          "name": "guidance",
+          "type": "FLOAT",
+          "links": [
+            7
+          ],
+          "slot_index": 6
+        },
+        {
+          "name": "steps",
+          "type": "INT",
+          "links": [
+            8
+          ],
+          "slot_index": 7
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MfluxMetadataLoader"
+      }
+    },
+    {
+      "id": 3,
+      "type": "QuickMfluxNode",
+      "pos": [
+        460,
+        170
+      ],
+      "size": [
+        320,
+        400
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "title": "Quick MFlux Generation",
+      "widgets_values": [
+        true,
+        "",
+        false,
+        0.0,
+        ""
+      ],
+      "inputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "link": 1,
+          "slot_index": 0
+        },
+        {
+          "name": "model",
+          "type": "STRING",
+          "link": 2,
+          "slot_index": 1
+        },
+        {
+          "name": "quantize",
+          "type": "STRING",
+          "link": 3,
+          "slot_index": 2
+        },
+        {
+          "name": "seed",
+          "type": "INT",
+          "link": 4,
+          "slot_index": 3
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "link": 5,
+          "slot_index": 4
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "link": 6,
+          "slot_index": 5
+        },
+        {
+          "name": "steps",
+          "type": "INT",
+          "link": 8,
+          "slot_index": 6
+        },
+        {
+          "name": "guidance",
+          "type": "FLOAT",
+          "link": 7,
+          "slot_index": 7
+        },
+        {
+          "name": "negative_prompt",
+          "type": "STRING",
+          "link": null,
+          "slot_index": 8
+        },
+        {
+          "name": "Local_model",
+          "type": "PATH",
+          "link": null,
+          "slot_index": 9
+        },
+        {
+          "name": "Loras",
+          "type": "MfluxLorasPipeline",
+          "link": null,
+          "slot_index": 10
+        },
+        {
+          "name": "img2img",
+          "type": "MfluxImg2ImgPipeline",
+          "link": null,
+          "slot_index": 11
+        },
+        {
+          "name": "ControlNet",
+          "type": "MfluxControlNetPipeline",
+          "link": null,
+          "slot_index": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            9
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "QuickMfluxNode"
+      }
+    },
+    {
+      "id": 4,
+      "type": "PreviewImage",
+      "pos": [
+        820,
+        170
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "title": "Preview",
+      "widgets_values": [],
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 9,
+          "slot_index": 0
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      3,
+      0,
+      "STRING"
+    ],
+    [
+      2,
+      2,
+      1,
+      3,
+      1,
+      "STRING"
+    ],
+    [
+      3,
+      2,
+      2,
+      3,
+      2,
+      "STRING"
+    ],
+    [
+      4,
+      2,
+      3,
+      3,
+      3,
+      "INT"
+    ],
+    [
+      5,
+      2,
+      4,
+      3,
+      4,
+      "INT"
+    ],
+    [
+      6,
+      2,
+      5,
+      3,
+      5,
+      "INT"
+    ],
+    [
+      7,
+      2,
+      6,
+      3,
+      7,
+      "FLOAT"
+    ],
+    [
+      8,
+      2,
+      7,
+      3,
+      6,
+      "INT"
+    ],
+    [
+      9,
+      3,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

@@ -14,6 +14,7 @@ from .Mflux_Comfy.Mflux_Pro import (
     MfluxFillLoader,
     MfluxImageRefLoader,
     MfluxScaleFactor,
+    MfluxMetadataLoader,
 )
 from .Mflux_Comfy.Mflux_Train import (
     MfluxTrainConfigBuilder,
@@ -34,6 +35,7 @@ NODE_CLASS_MAPPINGS = {
     "MfluxFillLoader":          MfluxFillLoader,
     "MfluxImageRefLoader":      MfluxImageRefLoader,
     "MfluxScaleFactor":         MfluxScaleFactor,
+    "MfluxMetadataLoader":      MfluxMetadataLoader,
     "MfluxTrainConfigBuilder":  MfluxTrainConfigBuilder,
     "MfluxTrainer":             MfluxTrainer,
 }
@@ -49,6 +51,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "MfluxFillLoader":          "MFlux Fill Loader",
     "MfluxImageRefLoader":      "MFlux Image Ref Loader",
     "MfluxScaleFactor":         "MFlux Scale Factor",
+    "MfluxMetadataLoader":      "MFlux Metadata Loader",
     "MfluxTrainConfigBuilder":  "MFlux Train Config Builder",
     "MfluxTrainer":             "MFlux Trainer",
 }
