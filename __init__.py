@@ -15,34 +15,42 @@ from .Mflux_Comfy.Mflux_Pro import (
     MfluxImageRefLoader,
     MfluxScaleFactor,
 )
+from .Mflux_Comfy.Mflux_Train import (
+    MfluxTrainConfigBuilder,
+    MfluxTrainer,
+)
 
 # ---------------------------------------------------------------------------
 # Basis-Nodes – immer verfügbar
 # ---------------------------------------------------------------------------
 NODE_CLASS_MAPPINGS = {
-    "QuickMfluxNode":        QuickMfluxNode,
-    "MfluxModelsLoader":     MfluxModelsLoader,
-    "MfluxModelsDownloader": MfluxModelsDownloader,
-    "MfluxCustomModels":     MfluxCustomModels,
-    "MfluxImg2Img":          MfluxImg2Img,
-    "MfluxLorasLoader":      MfluxLorasLoader,
-    "MfluxControlNetLoader": MfluxControlNetLoader,
-    "MfluxFillLoader":       MfluxFillLoader,
-    "MfluxImageRefLoader":   MfluxImageRefLoader,
-    "MfluxScaleFactor":      MfluxScaleFactor,
+    "QuickMfluxNode":           QuickMfluxNode,
+    "MfluxModelsLoader":        MfluxModelsLoader,
+    "MfluxModelsDownloader":    MfluxModelsDownloader,
+    "MfluxCustomModels":        MfluxCustomModels,
+    "MfluxImg2Img":             MfluxImg2Img,
+    "MfluxLorasLoader":         MfluxLorasLoader,
+    "MfluxControlNetLoader":    MfluxControlNetLoader,
+    "MfluxFillLoader":          MfluxFillLoader,
+    "MfluxImageRefLoader":      MfluxImageRefLoader,
+    "MfluxScaleFactor":         MfluxScaleFactor,
+    "MfluxTrainConfigBuilder":  MfluxTrainConfigBuilder,
+    "MfluxTrainer":             MfluxTrainer,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "QuickMfluxNode":        "Quick MFlux Generation",
-    "MfluxModelsLoader":     "MFlux Models Loader",
-    "MfluxModelsDownloader": "MFlux Models Downloader",
-    "MfluxCustomModels":     "MFlux Custom Models",
-    "MfluxImg2Img":          "MFlux Img2Img",
-    "MfluxLorasLoader":      "MFlux LoRAs Loader",
-    "MfluxControlNetLoader": "MFlux ControlNet Loader",
-    "MfluxFillLoader":       "MFlux Fill Loader",
-    "MfluxImageRefLoader":   "MFlux Image Ref Loader",
-    "MfluxScaleFactor":      "MFlux Scale Factor",
+    "QuickMfluxNode":           "Quick MFlux Generation",
+    "MfluxModelsLoader":        "MFlux Models Loader",
+    "MfluxModelsDownloader":    "MFlux Models Downloader",
+    "MfluxCustomModels":        "MFlux Custom Models",
+    "MfluxImg2Img":             "MFlux Img2Img",
+    "MfluxLorasLoader":         "MFlux LoRAs Loader",
+    "MfluxControlNetLoader":    "MFlux ControlNet Loader",
+    "MfluxFillLoader":          "MFlux Fill Loader",
+    "MfluxImageRefLoader":      "MFlux Image Ref Loader",
+    "MfluxScaleFactor":         "MFlux Scale Factor",
+    "MfluxTrainConfigBuilder":  "MFlux Train Config Builder",
+    "MfluxTrainer":             "MFlux Trainer",
 }
 
 # ---------------------------------------------------------------------------
