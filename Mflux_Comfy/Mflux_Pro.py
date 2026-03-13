@@ -92,15 +92,16 @@ class MfluxImg2Img:
         files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f))]
         return {
             "required": {
+                "image_file": (sorted(files), {
+                    "image_upload": True,
+                    "default": sorted(files)[0] if files else "example.png",
+                    "tooltip": "Upload an image file. Ignored when image_tensor is connected.",
+                }),
                 "image_strength": ("FLOAT", {"default": 0.4, "min": 0.0, "max": 1.0, "step": 0.01}),
             },
             "optional": {
-                "image_file": (sorted(files), {
-                    "image_upload": True,
-                    "tooltip": "Upload an image file from disk.",
-                }),
                 "image_tensor": ("IMAGE", {
-                    "tooltip": "Connect any IMAGE output here to override the uploaded file (e.g. from Quick MFlux Generation).",
+                    "tooltip": "Connect any IMAGE output here to override the uploaded file.",
                 }),
             },
         }
@@ -110,18 +111,18 @@ class MfluxImg2Img:
     RETURN_NAMES = ("img2img", "width", "height")
     FUNCTION = "load_and_process"
 
-    def load_and_process(self, image_strength, image_file=None, image_tensor=None):
+    def load_and_process(self, image_file, image_strength, image_tensor=None):
         if image_tensor is not None:
             image_path = _tensor_to_temp_path(image_tensor)
             print("[MfluxImg2Img] Using tensor from another node.")
-        elif image_file is not None and folder_paths.exists_annotated_filepath(image_file):
+        else:
+            if not folder_paths.exists_annotated_filepath(image_file):
+                raise ValueError(
+                    f"[MfluxImg2Img] Image file not found: {image_file}. "
+                    "Please upload an image or connect an IMAGE tensor."
+                )
             image_path = folder_paths.get_annotated_filepath(image_file)
             print("[MfluxImg2Img] Using uploaded image file.")
-        else:
-            raise ValueError(
-                "[MfluxImg2Img] No image available. "
-                "Please upload an image via image_file or connect an IMAGE tensor."
-            )
 
         with Image.open(image_path) as img:
             width, height = img.size
@@ -129,8 +130,8 @@ class MfluxImg2Img:
         return MfluxImg2ImgPipeline(image_path, image_strength), width, height
 
     @classmethod
-    def IS_CHANGED(cls, image_strength, image_file=None, image_tensor=None):
-        return (hash(image_file) if image_file else 0, round(float(image_strength), 2))
+    def IS_CHANGED(cls, image_file, image_strength, image_tensor=None):
+        return (hash(image_file), round(float(image_strength), 2))
 
 
 # ---------------------------------------------------------------------------
