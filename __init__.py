@@ -84,6 +84,11 @@ if HAS_FLUX2_EDIT:
     NODE_CLASS_MAPPINGS["MfluxFlux2EditNode"] = MfluxFlux2EditNode
     NODE_DISPLAY_NAME_MAPPINGS["MfluxFlux2EditNode"] = "MFlux FLUX.2 Edit (Multi-Image)"
 
+if HAS_SEEDVR2:
+    from .Mflux_Comfy.Mflux_Air import MfluxSeedVR2Node
+    NODE_CLASS_MAPPINGS["MfluxSeedVR2Node"] = MfluxSeedVR2Node
+    NODE_DISPLAY_NAME_MAPPINGS["MfluxSeedVR2Node"] = "MFlux SeedVR2 Upscaler"
+
 if HAS_QWEN:
     from .Mflux_Comfy.Mflux_Air import MfluxQwenNode, MfluxQwenEditNode
     NODE_CLASS_MAPPINGS["MfluxQwenNode"] = MfluxQwenNode

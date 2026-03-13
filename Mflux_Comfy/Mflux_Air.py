@@ -823,3 +823,98 @@ if HAS_FLUX2_EDIT:
                     },
                 )
             return generated
+
+
+# ---------------------------------------------------------------------------
+# Node: MfluxSeedVR2Node
+# SeedVR2 – diffusion-based upscaling, kein Prompt nötig
+# ---------------------------------------------------------------------------
+if HAS_SEEDVR2:
+    from .Mflux_Core import generate_seedvr2
+
+    class MfluxSeedVR2Node:
+        @classmethod
+        def INPUT_TYPES(cls):
+            return {
+                "required": {
+                    "resolution_mode": (["pixels", "scale_factor"], {
+                        "default": "scale_factor",
+                        "tooltip": "'pixels' = Kürzeste Seite auf N Pixel. "
+                                   "'scale_factor' = Bild um Faktor X vergrößern (z.B. 2x, 3x).",
+                    }),
+                    "resolution_px": ("INT", {
+                        "default": 2160, "min": 64, "max": 8192, "step": 8,
+                        "tooltip": "Ziel-Auflösung in Pixel (kürzeste Seite). Nur aktiv wenn mode=pixels.",
+                    }),
+                    "resolution_scale": ("FLOAT", {
+                        "default": 2.0, "min": 0.5, "max": 8.0, "step": 0.5,
+                        "tooltip": "Skalierungsfaktor (z.B. 2.0 = 2x). Nur aktiv wenn mode=scale_factor.",
+                    }),
+                    "softness": ("FLOAT", {
+                        "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.05,
+                        "tooltip": "Pre-downsampling vor dem Upscaling (0.0 = deaktiviert). "
+                                   "0.5 ist oft ein guter Startpunkt für weichere Ergebnisse.",
+                    }),
+                    "model": (["seedvr2-3b", "seedvr2-7b"], {
+                        "default": "seedvr2-3b",
+                        "tooltip": "3B ist schneller, 7B hat höhere Qualität.",
+                    }),
+                    "quantize": (ALL_QUANTIZE_OPTIONS, {"default": "4"}),
+                    "low_ram": ("BOOLEAN", {
+                        "default": False,
+                        "label_on": "True", "label_off": "False",
+                        "tooltip": "Speicher sparen durch Offloading. "
+                                   "Nicht kompatibel mit Batch-Verarbeitung mehrerer Bilder.",
+                    }),
+                    "mlx_cache_limit_gb": ("FLOAT", {
+                        "default": 0.0, "min": 0.0, "max": 64.0, "step": 0.5,
+                        "tooltip": "MLX Cache begrenzen in GB (0.0 = kein Limit).",
+                    }),
+                },
+                "optional": {
+                    "image_tensor": ("IMAGE", {
+                        "tooltip": "Bild direkt von einem anderen Node (z.B. QuickMfluxNode).",
+                    }),
+                    "image_ref":    ("MfluxImageRefPipeline", {
+                        "tooltip": "Alternative: MfluxImageRefLoader verbinden.",
+                    }),
+                    "Local_model":  ("PATH",),
+                },
+                "hidden": {"full_prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
+            }
+
+        RETURN_TYPES = ("IMAGE",)
+        CATEGORY = "MFlux/Air"
+        FUNCTION = "run"
+
+        def run(self, resolution_mode, resolution_px, resolution_scale, softness,
+                model, quantize, low_ram, mlx_cache_limit_gb,
+                image_tensor=None, image_ref=None, Local_model="",
+                full_prompt=None, extra_pnginfo=None):
+
+            # Bildpfad bestimmen: tensor hat Vorrang vor image_ref
+            if image_tensor is not None:
+                from .Mflux_Pro import _tensor_to_temp_path
+                image_path = _tensor_to_temp_path(image_tensor)
+                print("[MfluxSeedVR2] Using image from tensor.")
+            elif image_ref is not None:
+                image_path = image_ref.image_path
+                print("[MfluxSeedVR2] Using image from MfluxImageRefLoader.")
+            else:
+                raise ValueError(
+                    "[MfluxSeedVR2] Kein Bild verbunden. "
+                    "Verbinde entweder image_tensor oder image_ref."
+                )
+
+            generated = generate_seedvr2(
+                image_path=image_path,
+                resolution_mode=resolution_mode,
+                resolution_px=resolution_px,
+                resolution_scale=resolution_scale,
+                softness=softness,
+                quantize=quantize,
+                Local_model=Local_model,
+                low_ram=low_ram,
+                mlx_cache_limit_gb=mlx_cache_limit_gb,
+            )
+            return generated

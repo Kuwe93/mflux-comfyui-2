@@ -606,6 +606,63 @@ def generate_qwen_edit(prompt, seed, width, height, steps, guidance, quantize,
     return (_tensor_from_image(generated),)
 
 
+def generate_seedvr2(image_path, resolution_mode, resolution_px, resolution_scale,
+                     softness, quantize, Local_model="",
+                     low_ram=False, mlx_cache_limit_gb=0.0):
+    """SeedVR2 – diffusion-based upscaling, no prompt needed."""
+    if not HAS_SEEDVR2:
+        raise RuntimeError("SeedVR2 not available. Run: pip install -U mflux")
+
+    from mflux.utils.scale_factor import ScaleFactor
+
+    q = None if quantize == "None" else int(quantize)
+    path = Local_model.strip() if Local_model and Local_model.strip() else None
+
+    key = f"seedvr2::{quantize}::{Local_model}"
+    inst = _MODEL_CACHE.get(key)
+    if inst is None:
+        inst = SeedVR2(quantize=q, model_path=path)
+        _evict_and_store(key, inst)
+
+    # Resolution: entweder Pixel (int) oder ScaleFactor (2x, 3x…)
+    if resolution_mode == "pixels":
+        resolution = int(resolution_px)
+    else:
+        resolution = ScaleFactor(resolution_scale)
+
+    # Callbacks für low_ram / mlx_cache
+    callbacks = []
+    if low_ram or (mlx_cache_limit_gb and mlx_cache_limit_gb > 0):
+        try:
+            from mflux.callbacks.instances.memory_saver import MemorySaver
+            cache_bytes = int(mlx_cache_limit_gb * 1_000_000_000) if mlx_cache_limit_gb > 0 else 1_000_000_000
+            mem_saver = MemorySaver(
+                model=inst,
+                keep_transformer=not low_ram,
+                cache_limit_bytes=cache_bytes,
+            )
+            callbacks.append(mem_saver)
+        except ImportError:
+            print("[Mflux] MemorySaver not available.")
+    if callbacks:
+        try:
+            from mflux.callbacks.callback_registry import CallbackRegistry
+            CallbackRegistry.start(callbacks=callbacks)
+        except Exception as e:
+            print(f"[Mflux] CallbackRegistry error: {e}")
+
+    # Seed für SeedVR2 – immer zufällig da kein kreativer Einfluss
+    seed = random.randint(0, 0xFFFFFFFFFFFFFFFF)
+
+    generated = inst.generate_image(
+        seed=seed,
+        image_path=image_path,
+        resolution=resolution,
+        softness=float(softness),
+    )
+    return (_tensor_from_image(generated),)
+
+
 # ---------------------------------------------------------------------------
 # Metadaten speichern
 # ---------------------------------------------------------------------------
