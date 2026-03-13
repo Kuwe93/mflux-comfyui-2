@@ -1,5 +1,7 @@
 from .Mflux_Comfy.Mflux_Core import (
     HAS_FILL, HAS_DEPTH, HAS_REDUX, HAS_KONTEXT, HAS_QWEN,
+    HAS_FLUX2, HAS_FLUX2_EDIT, HAS_ZIMAGE, HAS_FIBO, HAS_SEEDVR2,
+    HAS_IN_CONTEXT,
 )
 from .Mflux_Comfy.Mflux_Air import (
     QuickMfluxNode,
