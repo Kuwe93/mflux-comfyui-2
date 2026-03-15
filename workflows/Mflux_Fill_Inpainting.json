@@ -49,8 +49,8 @@
         "Node name for S&R": "MfluxFillLoader"
       },
       "widgets_values": [
-        "placeholder.png",
-        "placeholder_mask.png"
+        "example.png",
+        "example.png"
       ]
     },
     {
